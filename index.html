@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@kacerekz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500&family=Inter&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: black;
+      font-family: 'Inter', sans-serif;
+      color: white;
+    }
+    #glow-wrapper {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+    #content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .glow {
+      transition: filter 0.2s ease;
+    }
+    .icon {
+      width: 2rem;
+      height: 2rem;
+      margin: 0 0.5rem;
+      filter: drop-shadow(0 0 0.3rem magenta);
+    }
+    #music-player {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 300px;
+      height: 170px;
+      border: 2px solid cyan;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="glow-wrapper"></canvas>
+  <div id="content">
+    <h1 class="text-4xl font-bold text-cyan-400 glow" style="font-family: 'Rajdhani', sans-serif">@kacerekz</h1>
+    <div class="mt-4 flex justify-center">
+      <a href="https://github.com/kacerekz" target="_blank"><img class="icon glow" src="https://cdn.jsdelivr.net/npm/simple-icons/icons/github.svg" alt="GitHub" /></a>
+      <a href="https://www.youtube.com/@kacerekz" target="_blank"><img class="icon glow" src="https://cdn.jsdelivr.net/npm/simple-icons/icons/youtube.svg" alt="YouTube" /></a>
+      <a href="https://itch.io/profile/kacerekz" target="_blank"><img class="icon glow" src="https://cdn.jsdelivr.net/npm/simple-icons/icons/itch-dot-io.svg" alt="itch.io" /></a>
+    </div>
+  </div>
+  <div id="music-player">
+    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/VoFlnWuIgW0?enablejsapi=1" 
+      title="Orbiting the Neon Glitch Star" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>
+  </div>
+  <script>
+    // Glow proximity effect
+    const glowElements = document.querySelectorAll('.glow');
+    document.addEventListener('mousemove', e => {
+      const { clientX: x, clientY: y } = e;
+      glowElements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        const dx = x - (rect.left + rect.width / 2);
+        const dy = y - (rect.top + rect.height / 2);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const strength = Math.max(0.2, 1.5 - dist / 300);
+        el.style.filter = `drop-shadow(0 0 ${strength.toFixed(2)}rem magenta)`;
+      });
+    });
+
+    // WebGL background
+    const canvas = document.getElementById('glow-wrapper');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+
+    const particles = new THREE.Group();
+    scene.add(particles);
+    camera.position.z = 10;
+
+    const shapes = [];
+    const colors = [0xff00ff, 0x00ffff, 0xffffff];
+    for (let i = 0; i < 200; i++) {
+      const geometry = new THREE.CircleGeometry(Math.random() * 0.05 + 0.02, 5);
+      const material = new THREE.MeshBasicMaterial({ color: colors[i % colors.length] });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 20
+      );
+      particles.add(mesh);
+      shapes.push(mesh);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      particles.rotation.y += 0.0005;
+      particles.rotation.x += 0.0003;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
